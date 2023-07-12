@@ -22,6 +22,32 @@ public class Recv1 {
         Channel channel = connection.createChannel();
 
 
+        //绑定交换机fanout扇形，即广播
+        channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.FANOUT);
+
+        //获取队列
+        String queueName = channel.queueDeclare().getQueue();
+
+        //绑定交换机和队列，fanout交换机不用routingkey
+        channel.queueBind(queueName, EXCHANGE_NAME, "");
+
+        Consumer consumer = new DefaultConsumer(channel) {
+
+            @Override
+            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+
+
+                System.out.println("body:" + new String(body, "utf-8"));
+
+
+                //手工确认消息消费，不是多条确认
+                channel.basicAck(envelope.getDeliveryTag(), false);
+            }
+        };
+
+
+        //消费,关闭消息自动确认，采用手工确认
+        channel.basicConsume(queueName, false, consumer);
 
     }
 }

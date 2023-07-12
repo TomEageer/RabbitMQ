@@ -27,10 +27,10 @@ public class Send {
             //绑定交换机fanout扇形，即广播
             channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.FANOUT);
 
-            String msg = "RabbitMQ发布";
+            String msg = "msg = RabbitMQ_Send发布";
             channel.basicPublish(EXCHANGE_NAME,  "", null,msg.getBytes(StandardCharsets.UTF_8));
 
-            System.out.println("广播发送成功");
+            System.out.println("Send广播发送成功");
 
         }
     }

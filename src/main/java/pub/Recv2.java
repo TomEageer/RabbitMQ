@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Recv2 {
 
-    private final static String EXCHANGE_NAME = "work_mq_rr";
+    private final static String EXCHANGE_NAME = "exchange_fanout";
 
     public static void main(String[] argv) throws Exception {
         ConnectionFactory factory = new ConnectionFactory();
@@ -21,9 +21,15 @@ public class Recv2 {
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
 
-        channel.queueDeclare(EXCHANGE_NAME, false, false, false, null);
-        System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
 
+        //绑定交换机fanout扇形，即广播
+        channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.FANOUT);
+
+        //获取队列
+        String queueName = channel.queueDeclare().getQueue();
+
+        //绑定交换机和队列，fanout交换机不用routingkey
+        channel.queueBind(queueName, EXCHANGE_NAME, "");
 
         Consumer consumer = new DefaultConsumer(channel) {
 
@@ -31,16 +37,6 @@ public class Recv2 {
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
 
 
-                //模拟消费者消费慢
-                try {
-                    TimeUnit.SECONDS.sleep(2);
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-
-//                System.out.println("consumerTag:" + consumerTag);
-//                System.out.println("envelope:" + envelope);
-//                System.out.println("properties:" + properties);
                 System.out.println("body:" + new String(body, "utf-8"));
 
 
@@ -51,7 +47,7 @@ public class Recv2 {
 
 
         //消费,关闭消息自动确认，采用手工确认
-        channel.basicConsume(EXCHANGE_NAME, false, consumer);
+        channel.basicConsume(queueName, false, consumer);
 
     }
 }
