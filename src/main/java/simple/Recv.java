@@ -41,11 +41,6 @@ public class Recv {
         //消费
         channel.basicConsume(QUEUE_NAME, true, consumer);
 
-//        DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-//            String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
-//            System.out.println(" [x] Received '" + message + "'");
-//        };
-//        channel.basicConsume(QUEUE_NAME, true, deliverCallback, consumerTag -> {
-//        });
+
     }
 }
